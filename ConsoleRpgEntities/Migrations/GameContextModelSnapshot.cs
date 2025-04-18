@@ -152,6 +152,71 @@ namespace ConsoleRpgEntities.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
+
+            modelBuilder.Entity("ConsoleRpgEntities.Models.Items.Item", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                b.Property<string>("Name")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<double>("Value")
+                    .HasColumnType("float");
+
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("LinkedPlayerId")
+                    .HasColumnType("int");
+
+                b.Property<string>("ItemType")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("Durability")
+                    .HasColumnType("int");
+
+                b.HasKey("Id");
+
+                b.ToTable("Items");
+
+                b.HasDiscriminator<string>("ItemType").HasValue("Item");
+            });
+
+            modelBuilder.Entity("ConsoleRpgEntities.Models.Items.Item", b =>
+            {
+                b.HasOne("ConsoleRpgEntities.Models.Characters.Player", "Player")
+                    .WithMany("Inventory")
+                    .HasForeignKey("LinkedPlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Player");
+            });
+
+            modelBuilder.Entity("ConsoleRpgEntities.Models.Items.Weapon", b =>
+            {
+                b.HasBaseType("ConsoleRpgEntities.Models.Items.Item");
+
+                b.Property<int>("AttackPower")
+                    .HasColumnType("int");
+
+                b.HasDiscriminator().HasValue("Weapon");
+            });
+
+            modelBuilder.Entity("ConsoleRpgEntities.Models.Items.Armor", b =>
+            {
+                b.HasBaseType("ConsoleRpgEntities.Models.Items.Item");
+
+                b.Property<int>("DefensePower")
+                    .HasColumnType("int");
+
+                b.HasDiscriminator().HasValue("Armor");
+            });
 #pragma warning restore 612, 618
         }
     }

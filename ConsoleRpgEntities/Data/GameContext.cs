@@ -1,5 +1,6 @@
 ﻿using ConsoleRpgEntities.Models.Abilities.PlayerAbilities;
 using ConsoleRpgEntities.Models.Characters;
+using ConsoleRpgEntities.Models.Items;
 using ConsoleRpgEntities.Models.Characters.Monsters;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,9 +8,10 @@ namespace ConsoleRpgEntities.Data
 {
     public class GameContext : DbContext
     {
-        public DbSet<Player> Players { get; set; }
-        public DbSet<Monster> Monsters { get; set; }
-        public DbSet<Ability> Abilities { get; set; }
+        public DbSet<Player>? Players { get; set; }
+        public DbSet<Monster>? Monsters { get; set; }
+        public DbSet<Ability>? Abilities { get; set; }
+        public DbSet<Item>? Items { get; set; }
 
         public GameContext(DbContextOptions<GameContext> options) : base(options)
         {
@@ -26,6 +28,21 @@ namespace ConsoleRpgEntities.Data
             modelBuilder.Entity<Ability>()
                 .HasDiscriminator<string>(pa=>pa.AbilityType)
                 .HasValue<ShoveAbility>("ShoveAbility");
+
+            modelBuilder.Entity<Item>()
+                .HasDiscriminator<string>(i => i.ItemType)
+                .HasValue<Weapon>("Weapon")
+                .HasValue<Armor>("Armor");
+
+            modelBuilder.Entity<Item>()
+                .Property(i => i.PlayerId)
+                .HasColumnName("LinkedPlayerId");
+
+            modelBuilder.Entity<Player>()
+                .HasMany(p => p.Inventory)
+                .WithOne(i => i.Player)
+                .HasForeignKey(i => i.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Configure many-to-many relationship
             modelBuilder.Entity<Player>()
